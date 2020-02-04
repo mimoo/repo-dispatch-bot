@@ -3,10 +3,12 @@ import child_process from 'child_process';
 import { promises as fs } from 'fs';
 import { promisify } from 'util';
 import tmp from 'tmp-promise';
+import Octokit from '@octokit/rest';
 
 const exec = promisify(child_process.exec);
 
 async function handle_pr(context: Context) {
+  // helpers
   context.log("handling PR");
   const pr_number = context.payload.pull_request.number;
   const head_sha = context.payload.pull_request.head.sha;
@@ -16,7 +18,11 @@ async function handle_pr(context: Context) {
   const base_sha = commits.data[0].parents[0].sha;
 
   // send a repo dispatch to calibra/mirai-bot in order to run MIRAI on the PR
-  context.github.repos.createDispatchEvent({
+  const octokit = new Octokit({
+    auth: process.env.MIRAI_BOT,
+    userAgent: "repo-dispatch-bot"
+  });
+  await octokit.repos.createDispatchEvent({
     "owner": "mimoo",
     "repo": "mirai-bot",
     "event_type": "new_PR",
@@ -36,6 +42,12 @@ export = (app: Application) => {
 
   app.on('pull_request.synchronize', async (context: Context) => {
     context.log("pull request synchronize");
+    await handle_pr(context);
+  });
+
+  // DELETE THIS
+  app.on('pull_request.reopened', async (context: Context) => {
+    context.log("pull request reopened");
     await handle_pr(context);
   });
 }
