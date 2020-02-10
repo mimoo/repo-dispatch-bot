@@ -3,7 +3,7 @@ import child_process from 'child_process';
 import { promises as fs } from 'fs';
 import { promisify } from 'util';
 import tmp from 'tmp-promise';
-import Octokit from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
 
 const exec = promisify(child_process.exec);
 
