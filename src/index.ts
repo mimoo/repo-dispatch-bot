@@ -27,6 +27,8 @@ async function handle_pr(context: Context) {
     "repo": "mirai-bot",
     "event_type": "new_PR",
     "client_payload": context.repo({
+      "sender": context.payload.pull_request.sender,
+      "action": context.payload.pull_request.action,
       "pull_id": pr_number,
       "pull_ref": head_sha,
       "base_ref": base_sha
